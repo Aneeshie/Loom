@@ -1,0 +1,4 @@
+[INFO] Server started
+[INFO] Database connected
+[ERROR] Failed to connect to Redis
+[INFO] User logged in
