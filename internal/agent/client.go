@@ -11,13 +11,13 @@ import (
 
 func NewClient() (pb.LogServiceClient, error) {
 
-	cfg, err := config.LoadServerConfig("../../configs/server.yaml")
+	cfg, err := config.LoadAgentConfig("../../configs/agent.yaml")
 	if err != nil {
-		log.Fatalf("Could not load the server config, %v", err)
+		log.Fatalf("Could not load the agent config, %v", err)
 	}
 
 	conn, err := grpc.NewClient(
-		cfg.GRPC.Addr,
+		cfg.Server.Addr,
 		grpc.WithTransportCredentials(
 			insecure.NewCredentials(),
 		),

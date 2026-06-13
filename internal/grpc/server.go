@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/Aneeshie/loom/internal/config"
 	pb "github.com/Aneeshie/loom/proto"
 	"google.golang.org/grpc"
 )
@@ -27,8 +28,13 @@ func NewServer() *GRPCServer {
 
 func (g *GRPCServer) Run() {
 
-	//TODO: get ip addr from cfg
-	list, err := net.Listen("tcp", ":8080")
+	cfg, err := config.LoadServerConfig("../../configs/server.yaml")
+
+	if err != nil {
+		log.Fatalf("Could not load the server config %v", err)
+	}
+
+	list, err := net.Listen("tcp", cfg.GRPC.Addr)
 	if err != nil {
 		log.Fatal(err)
 	}
