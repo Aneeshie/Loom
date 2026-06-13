@@ -1,0 +1,9 @@
+server:
+  addr: "localhost:8080"
+
+service:
+  name: "test_service"
+  host: "localhost"
+
+source:
+  path: "../../testdata/test.log"

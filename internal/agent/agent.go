@@ -8,12 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Aneeshie/loom/internal/config"
 	pb "github.com/Aneeshie/loom/proto"
-)
-
-const (
-	serviceName = "test"
-	host        = "ubuntu"
 )
 
 type Agent struct {
@@ -27,8 +23,13 @@ func New(client pb.LogServiceClient) *Agent {
 }
 
 func (a *Agent) Run() {
-	//TODO: add test later to cfg path
-	file, err := os.Open("../../testdata/test.log")
+	cfg, err := config.LoadAgentConfig("../../configs/agent.yaml")
+
+	if err != nil {
+		log.Fatalf("Cannot load agent config %v", err)
+	}
+
+	file, err := os.Open(cfg.Source.Path)
 
 	if err != nil {
 		log.Fatal(err)
@@ -48,8 +49,8 @@ func (a *Agent) Run() {
 		}
 
 		resp, err := a.client.SendLog(context.Background(), &pb.SendLogRequest{
-			ServiceName: serviceName,
-			Host:        host,
+			ServiceName: cfg.Service.Name,
+			Host:        cfg.Service.Host,
 			Level:       level,
 			Message:     message,
 			Timestamp:   time.Now().Unix(),
