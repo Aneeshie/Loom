@@ -30,3 +30,16 @@ func (s *LogService) SendLog(ctx context.Context, req *pb.SendLogRequest) (*pb.S
 		Message: "received",
 	}, nil
 }
+
+func (s *LogService) GetLogs(ctx context.Context, req *pb.GetLogsRequest) (*pb.GetLogsResponse, error) {
+	logs, err := s.store.GetLogs(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetLogsResponse{
+		Logs: logs,
+	}, nil
+
+}

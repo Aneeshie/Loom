@@ -58,6 +58,23 @@ func (a *Agent) Run() {
 
 		fmt.Println(resp.Message)
 
+		logResp, err := a.client.GetLogs(
+			context.Background(),
+			&pb.GetLogsRequest{},
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, logEntry := range logResp.Logs {
+			fmt.Printf(
+				"[%s] %s\n",
+				logEntry.Level,
+				logEntry.Message,
+			)
+		}
+
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

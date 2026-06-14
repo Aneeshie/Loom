@@ -141,6 +141,170 @@ func (x *SendLogResponse) GetMessage() string {
 	return ""
 }
 
+type Log struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ServiceName   string                 `protobuf:"bytes,2,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	Host          string                 `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Level         string                 `protobuf:"bytes,4,opt,name=level,proto3" json:"level,omitempty"`
+	Message       string                 `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	Timestamp     int64                  `protobuf:"varint,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Log) Reset() {
+	*x = Log{}
+	mi := &file_proto_log_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Log) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Log) ProtoMessage() {}
+
+func (x *Log) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_log_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Log.ProtoReflect.Descriptor instead.
+func (*Log) Descriptor() ([]byte, []int) {
+	return file_proto_log_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Log) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Log) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *Log) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *Log) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *Log) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *Log) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+type GetLogsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Logs          []*Log                 `protobuf:"bytes,1,rep,name=logs,proto3" json:"logs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLogsResponse) Reset() {
+	*x = GetLogsResponse{}
+	mi := &file_proto_log_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLogsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLogsResponse) ProtoMessage() {}
+
+func (x *GetLogsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_log_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLogsResponse.ProtoReflect.Descriptor instead.
+func (*GetLogsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_log_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetLogsResponse) GetLogs() []*Log {
+	if x != nil {
+		return x.Logs
+	}
+	return nil
+}
+
+type GetLogsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLogsRequest) Reset() {
+	*x = GetLogsRequest{}
+	mi := &file_proto_log_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLogsRequest) ProtoMessage() {}
+
+func (x *GetLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_log_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLogsRequest.ProtoReflect.Descriptor instead.
+func (*GetLogsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_log_proto_rawDescGZIP(), []int{4}
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -153,10 +317,21 @@ const file_proto_log_proto_rawDesc = "" +
 	"\amessage\x18\x04 \x01(\tR\amessage\x12\x1c\n" +
 	"\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\"+\n" +
 	"\x0fSendLogResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2J\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\x9a\x01\n" +
+	"\x03Log\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
+	"\fservice_name\x18\x02 \x01(\tR\vserviceName\x12\x12\n" +
+	"\x04host\x18\x03 \x01(\tR\x04host\x12\x14\n" +
+	"\x05level\x18\x04 \x01(\tR\x05level\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessage\x12\x1c\n" +
+	"\ttimestamp\x18\x06 \x01(\x03R\ttimestamp\"3\n" +
+	"\x0fGetLogsResponse\x12 \n" +
+	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"\x10\n" +
+	"\x0eGetLogsRequest2\x88\x01\n" +
 	"\n" +
 	"LogService\x12<\n" +
-	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponseB Z\x1egithub.com/Aneeshie/loom/protob\x06proto3"
+	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +
+	"\aGetLogs\x12\x17.loom.v1.GetLogsRequest\x1a\x18.loom.v1.GetLogsResponseB Z\x1egithub.com/Aneeshie/loom/protob\x06proto3"
 
 var (
 	file_proto_log_proto_rawDescOnce sync.Once
@@ -170,19 +345,25 @@ func file_proto_log_proto_rawDescGZIP() []byte {
 	return file_proto_log_proto_rawDescData
 }
 
-var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_log_proto_goTypes = []any{
 	(*SendLogRequest)(nil),  // 0: loom.v1.SendLogRequest
 	(*SendLogResponse)(nil), // 1: loom.v1.SendLogResponse
+	(*Log)(nil),             // 2: loom.v1.Log
+	(*GetLogsResponse)(nil), // 3: loom.v1.GetLogsResponse
+	(*GetLogsRequest)(nil),  // 4: loom.v1.GetLogsRequest
 }
 var file_proto_log_proto_depIdxs = []int32{
-	0, // 0: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
-	1, // 1: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: loom.v1.GetLogsResponse.logs:type_name -> loom.v1.Log
+	0, // 1: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
+	4, // 2: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
+	1, // 3: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
+	3, // 4: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_log_proto_init() }
@@ -196,7 +377,7 @@ func file_proto_log_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_log_proto_rawDesc), len(file_proto_log_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

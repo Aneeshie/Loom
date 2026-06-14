@@ -12,10 +12,27 @@ message SendLogRequest {
   int64 timestamp = 5;
 }
 
-message SendLogResponse{
+message SendLogResponse {
   string message = 1;
 }
 
+message Log {
+  int64 id = 1;
+  string service_name = 2;
+  string host = 3;
+  string level = 4;
+  string message = 5;
+  int64 timestamp = 6;
+}
+
+message GetLogsResponse {
+  repeated Log logs = 1;
+}
+
+message GetLogsRequest {}
+
 service LogService {
   rpc SendLog(SendLogRequest) returns (SendLogResponse);
+
+  rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
 }
