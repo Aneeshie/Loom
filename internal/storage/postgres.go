@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 
+	pb "github.com/Aneeshie/loom/proto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -22,8 +23,27 @@ func NewStore(databaseURL string) (*Store, error) {
 	}, nil
 }
 
-func (s *Store) InsertLogs() {
+func (s *Store) InsertLog(ctx context.Context, req *pb.SendLogRequest) error {
+	_, err := s.db.Exec(
+		ctx,
+		`
+		INSERT INTO logs (
+		service_name,
+		host,
+		level,
+		message,
+		timestamp
+		)
+		VALUES ($1, $2, $3, $4, $5)
+		`,
+		req.ServiceName,
+		req.Host,
+		req.Level,
+		req.Message,
+		req.Timestamp,
+	)
 
+	return err
 }
 
 func (s *Store) CloseConnection() {

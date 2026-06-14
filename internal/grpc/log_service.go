@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"log"
 
 	"github.com/Aneeshie/loom/internal/storage"
 	pb "github.com/Aneeshie/loom/proto"
@@ -21,11 +20,12 @@ func NewLogService(store *storage.Store) *LogService {
 
 func (s *LogService) SendLog(ctx context.Context, req *pb.SendLogRequest) (*pb.SendLogResponse, error) {
 
-	log.Printf(
-		"[%s] %s",
-		req.Level,
-		req.Message,
-	)
+	err := s.store.InsertLog(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.SendLogResponse{
 		Message: "received",
 	}, nil
