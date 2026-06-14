@@ -2,4 +2,4 @@ grpc:
   addr: ":8080"
 
 database:
-  url: ""
+  url: "postgres://myuser:mysecretpassword@localhost:5432/mydatabase?sslmode=disable"

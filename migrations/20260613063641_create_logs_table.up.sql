@@ -1,0 +1,9 @@
+
+CREATE TABLE IF NOT EXISTS logs (
+  id BIGSERIAL PRIMARY KEY,
+  service_name TEXT NOT NULL,
+  host TEXT NOT NULL,
+  level TEXT NOT NULL,
+  message TEXT NOT NULL,
+  timestamp BIGINT NOT NULL
+);
