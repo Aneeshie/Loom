@@ -13,12 +13,12 @@ type GRPCServer struct {
 	server *grpc.Server
 }
 
-func NewServer() *GRPCServer {
+func NewServer(logService *LogService) *GRPCServer {
 
 	var opts []grpc.ServerOption
 
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterLogServiceServer(grpcServer, &LogService{})
+	pb.RegisterLogServiceServer(grpcServer, logService)
 
 	return &GRPCServer{
 		server: grpcServer,
