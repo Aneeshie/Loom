@@ -1,23 +1,15 @@
 package agent
 
 import (
-	"log"
-
-	"github.com/Aneeshie/loom/internal/config"
 	pb "github.com/Aneeshie/loom/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewClient() (pb.LogServiceClient, error) {
-
-	cfg, err := config.LoadAgentConfig("../../configs/agent.yaml")
-	if err != nil {
-		log.Fatalf("Could not load the agent config, %v", err)
-	}
+func NewClient(addr string) (pb.LogServiceClient, error) {
 
 	conn, err := grpc.NewClient(
-		cfg.Server.Addr,
+		addr,
 		grpc.WithTransportCredentials(
 			insecure.NewCredentials(),
 		),

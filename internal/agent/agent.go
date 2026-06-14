@@ -14,22 +14,18 @@ import (
 
 type Agent struct {
 	client pb.LogServiceClient
+	cfg    *config.AgentConfig
 }
 
-func New(client pb.LogServiceClient) *Agent {
+func New(client pb.LogServiceClient, cfg *config.AgentConfig) *Agent {
 	return &Agent{
 		client: client,
+		cfg:    cfg,
 	}
 }
 
 func (a *Agent) Run() {
-	cfg, err := config.LoadAgentConfig("../../configs/agent.yaml")
-
-	if err != nil {
-		log.Fatalf("Cannot load agent config %v", err)
-	}
-
-	file, err := os.Open(cfg.Source.Path)
+	file, err := os.Open(a.cfg.Source.Path)
 
 	if err != nil {
 		log.Fatal(err)
@@ -49,8 +45,8 @@ func (a *Agent) Run() {
 		}
 
 		resp, err := a.client.SendLog(context.Background(), &pb.SendLogRequest{
-			ServiceName: cfg.Service.Name,
-			Host:        cfg.Service.Host,
+			ServiceName: a.cfg.Service.Name,
+			Host:        a.cfg.Service.Host,
 			Level:       level,
 			Message:     message,
 			Timestamp:   time.Now().Unix(),
