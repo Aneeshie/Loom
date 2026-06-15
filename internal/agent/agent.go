@@ -60,7 +60,9 @@ func (a *Agent) Run() {
 
 		logResp, err := a.client.GetLogs(
 			context.Background(),
-			&pb.GetLogsRequest{},
+			&pb.GetLogsRequest{
+				Limit: a.cfg.Query.Limit,
+			},
 		)
 
 		if err != nil {

@@ -271,6 +271,7 @@ func (x *GetLogsResponse) GetLogs() []*Log {
 
 type GetLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int64                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -305,6 +306,13 @@ func (*GetLogsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_log_proto_rawDescGZIP(), []int{4}
 }
 
+func (x *GetLogsRequest) GetLimit() int64 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -326,8 +334,9 @@ const file_proto_log_proto_rawDesc = "" +
 	"\amessage\x18\x05 \x01(\tR\amessage\x12\x1c\n" +
 	"\ttimestamp\x18\x06 \x01(\x03R\ttimestamp\"3\n" +
 	"\x0fGetLogsResponse\x12 \n" +
-	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"\x10\n" +
-	"\x0eGetLogsRequest2\x88\x01\n" +
+	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"&\n" +
+	"\x0eGetLogsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x03R\x05limit2\x88\x01\n" +
 	"\n" +
 	"LogService\x12<\n" +
 	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +

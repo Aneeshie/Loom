@@ -19,6 +19,10 @@ type AgentConfig struct {
 	Source struct {
 		Path string `yaml:"path"`
 	} `yaml:"source"`
+
+	Query struct {
+		Limit int64 `yaml:"limit"`
+	} `yaml:"query"`
 }
 
 type ServerConfig struct {

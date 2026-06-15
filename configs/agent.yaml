@@ -7,3 +7,6 @@ service:
 
 source:
   path: "../../testdata/test.log"
+
+query:
+  limit: 20

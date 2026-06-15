@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 
 	pb "github.com/Aneeshie/loom/proto"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -50,7 +51,11 @@ func (s *Store) CloseConnection() {
 	s.db.Close()
 }
 
-func (s *Store) GetLogs(ctx context.Context) ([]*pb.Log, error) {
+func (s *Store) GetLogs(ctx context.Context, limit int64) ([]*pb.Log, error) {
+	if limit < 1 || limit > 100 {
+		return nil, fmt.Errorf("Limit too high, should be under 100 and above 0")
+	}
+
 	rows, err := s.db.Query(
 		ctx,
 		`
@@ -62,7 +67,9 @@ func (s *Store) GetLogs(ctx context.Context) ([]*pb.Log, error) {
 				message,
 				timestamp
 			FROM logs
+			LIMIT $1
 		`,
+		limit,
 	)
 
 	if err != nil {
