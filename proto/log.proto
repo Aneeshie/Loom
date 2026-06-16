@@ -31,6 +31,13 @@ message GetLogsResponse {
 
 message GetLogsRequest {
   int64 limit = 1;
+  LogFilter filter= 2;
+}
+
+message LogFilter {
+  optional string level = 1;
+  optional string service_name = 2;
+  optional string host = 3;
 }
 
 service LogService {

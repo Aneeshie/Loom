@@ -54,10 +54,16 @@ func (a *Agent) Run() {
 
 		fmt.Println(resp.Message)
 
+		//DUMMY FILTER
+		filter := a.cfg.Service.Name
+
 		logResp, err := a.client.GetLogs(
 			context.Background(),
 			&pb.GetLogsRequest{
 				Limit: a.cfg.Query.Limit,
+				Filter: &pb.LogFilter{
+					ServiceName: &filter,
+				},
 			},
 		)
 

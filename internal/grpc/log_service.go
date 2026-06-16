@@ -32,7 +32,7 @@ func (s *LogService) SendLog(ctx context.Context, req *pb.SendLogRequest) (*pb.S
 }
 
 func (s *LogService) GetLogs(ctx context.Context, req *pb.GetLogsRequest) (*pb.GetLogsResponse, error) {
-	logs, err := s.store.GetLogs(ctx, req.Limit)
+	logs, err := s.store.GetLogs(ctx, req.Limit, req.Filter)
 
 	if err != nil {
 		return nil, err

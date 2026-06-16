@@ -272,6 +272,7 @@ func (x *GetLogsResponse) GetLogs() []*Log {
 type GetLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int64                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Filter        *LogFilter             `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -313,6 +314,73 @@ func (x *GetLogsRequest) GetLimit() int64 {
 	return 0
 }
 
+func (x *GetLogsRequest) GetFilter() *LogFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
+type LogFilter struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Level         *string                `protobuf:"bytes,1,opt,name=level,proto3,oneof" json:"level,omitempty"`
+	ServiceName   *string                `protobuf:"bytes,2,opt,name=service_name,json=serviceName,proto3,oneof" json:"service_name,omitempty"`
+	Host          *string                `protobuf:"bytes,3,opt,name=host,proto3,oneof" json:"host,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogFilter) Reset() {
+	*x = LogFilter{}
+	mi := &file_proto_log_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogFilter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogFilter) ProtoMessage() {}
+
+func (x *LogFilter) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_log_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogFilter.ProtoReflect.Descriptor instead.
+func (*LogFilter) Descriptor() ([]byte, []int) {
+	return file_proto_log_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *LogFilter) GetLevel() string {
+	if x != nil && x.Level != nil {
+		return *x.Level
+	}
+	return ""
+}
+
+func (x *LogFilter) GetServiceName() string {
+	if x != nil && x.ServiceName != nil {
+		return *x.ServiceName
+	}
+	return ""
+}
+
+func (x *LogFilter) GetHost() string {
+	if x != nil && x.Host != nil {
+		return *x.Host
+	}
+	return ""
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -334,9 +402,17 @@ const file_proto_log_proto_rawDesc = "" +
 	"\amessage\x18\x05 \x01(\tR\amessage\x12\x1c\n" +
 	"\ttimestamp\x18\x06 \x01(\x03R\ttimestamp\"3\n" +
 	"\x0fGetLogsResponse\x12 \n" +
-	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"&\n" +
+	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"R\n" +
 	"\x0eGetLogsRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\x03R\x05limit2\x88\x01\n" +
+	"\x05limit\x18\x01 \x01(\x03R\x05limit\x12*\n" +
+	"\x06filter\x18\x02 \x01(\v2\x12.loom.v1.LogFilterR\x06filter\"\x8b\x01\n" +
+	"\tLogFilter\x12\x19\n" +
+	"\x05level\x18\x01 \x01(\tH\x00R\x05level\x88\x01\x01\x12&\n" +
+	"\fservice_name\x18\x02 \x01(\tH\x01R\vserviceName\x88\x01\x01\x12\x17\n" +
+	"\x04host\x18\x03 \x01(\tH\x02R\x04host\x88\x01\x01B\b\n" +
+	"\x06_levelB\x0f\n" +
+	"\r_service_nameB\a\n" +
+	"\x05_host2\x88\x01\n" +
 	"\n" +
 	"LogService\x12<\n" +
 	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +
@@ -354,25 +430,27 @@ func file_proto_log_proto_rawDescGZIP() []byte {
 	return file_proto_log_proto_rawDescData
 }
 
-var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_log_proto_goTypes = []any{
 	(*SendLogRequest)(nil),  // 0: loom.v1.SendLogRequest
 	(*SendLogResponse)(nil), // 1: loom.v1.SendLogResponse
 	(*Log)(nil),             // 2: loom.v1.Log
 	(*GetLogsResponse)(nil), // 3: loom.v1.GetLogsResponse
 	(*GetLogsRequest)(nil),  // 4: loom.v1.GetLogsRequest
+	(*LogFilter)(nil),       // 5: loom.v1.LogFilter
 }
 var file_proto_log_proto_depIdxs = []int32{
 	2, // 0: loom.v1.GetLogsResponse.logs:type_name -> loom.v1.Log
-	0, // 1: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
-	4, // 2: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
-	1, // 3: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
-	3, // 4: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	5, // 1: loom.v1.GetLogsRequest.filter:type_name -> loom.v1.LogFilter
+	0, // 2: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
+	4, // 3: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
+	1, // 4: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
+	3, // 5: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_log_proto_init() }
@@ -380,13 +458,14 @@ func file_proto_log_proto_init() {
 	if File_proto_log_proto != nil {
 		return
 	}
+	file_proto_log_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_log_proto_rawDesc), len(file_proto_log_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
