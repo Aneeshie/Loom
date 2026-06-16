@@ -29,11 +29,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *follow {
-		runFollow(client)
-		return
-	}
-
 	var filter *pb.LogFilter
 
 	if *level != "" || *service != "" || *host != "" {
@@ -60,6 +55,11 @@ func main() {
 
 	}
 
+	if *follow {
+		runFollow(client, filter)
+		return
+	}
+
 	resp, err := client.GetLogs(context.Background(), &pb.GetLogsRequest{
 		Limit:  *limit,
 		Filter: filter,
@@ -83,8 +83,10 @@ func main() {
 
 }
 
-func runFollow(client pb.LogServiceClient) {
-	stream, err := client.StreamLogs(context.Background(), &pb.StreamLogsRequest{})
+func runFollow(client pb.LogServiceClient, filter *pb.LogFilter) {
+	stream, err := client.StreamLogs(context.Background(), &pb.StreamLogsRequest{
+		Filter: filter,
+	})
 
 	if err != nil {
 		log.Fatal(err)

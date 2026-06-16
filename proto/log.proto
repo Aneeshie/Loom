@@ -31,7 +31,7 @@ message GetLogsResponse {
 
 message GetLogsRequest {
   int64 limit = 1;
-  LogFilter filter= 2;
+  LogFilter filter = 2;
 }
 
 message LogFilter {
@@ -40,7 +40,9 @@ message LogFilter {
   optional string host = 3;
 }
 
-message StreamLogsRequest{}
+message StreamLogsRequest {
+  LogFilter filter = 1;
+}
 
 service LogService {
   rpc SendLog(SendLogRequest) returns (SendLogResponse);

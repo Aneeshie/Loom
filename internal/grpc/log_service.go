@@ -61,7 +61,8 @@ func (s *LogService) GetLogs(ctx context.Context, req *pb.GetLogsRequest) (*pb.G
 
 func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStreamingServer[pb.Log]) error {
 	sub := &Subscriber{
-		ch: make(chan *pb.Log),
+		ch:     make(chan *pb.Log),
+		filter: req.Filter,
 	}
 
 	s.mu.Lock()
@@ -87,10 +88,36 @@ func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStr
 }
 
 func (s *LogService) broadcast(log *pb.Log) {
-	s.mu.Lock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	for sub := range s.subscribers {
-		sub.ch <- log
+		if matchesFilter(log, sub.filter) {
+			sub.ch <- log
+		}
+	}
+}
+
+func matchesFilter(log *pb.Log, filter *pb.LogFilter) bool {
+	if filter == nil {
+		return true
 	}
 
-	s.mu.RUnlock()
+	if filter.Level != nil &&
+		log.Level != *filter.Level {
+		return false
+	}
+
+	if filter.ServiceName != nil &&
+		log.ServiceName != *filter.ServiceName {
+		return false
+	}
+
+	if filter.Host != nil &&
+		log.Host != *filter.Host {
+		return false
+	}
+
+	return true
+
 }

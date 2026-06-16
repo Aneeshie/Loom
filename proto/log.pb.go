@@ -383,6 +383,7 @@ func (x *LogFilter) GetHost() string {
 
 type StreamLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filter        *LogFilter             `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -417,6 +418,13 @@ func (*StreamLogsRequest) Descriptor() ([]byte, []int) {
 	return file_proto_log_proto_rawDescGZIP(), []int{6}
 }
 
+func (x *StreamLogsRequest) GetFilter() *LogFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -448,8 +456,9 @@ const file_proto_log_proto_rawDesc = "" +
 	"\x04host\x18\x03 \x01(\tH\x02R\x04host\x88\x01\x01B\b\n" +
 	"\x06_levelB\x0f\n" +
 	"\r_service_nameB\a\n" +
-	"\x05_host\"\x13\n" +
-	"\x11StreamLogsRequest2\xc2\x01\n" +
+	"\x05_host\"?\n" +
+	"\x11StreamLogsRequest\x12*\n" +
+	"\x06filter\x18\x01 \x01(\v2\x12.loom.v1.LogFilterR\x06filter2\xc2\x01\n" +
 	"\n" +
 	"LogService\x12<\n" +
 	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +
@@ -482,17 +491,18 @@ var file_proto_log_proto_goTypes = []any{
 var file_proto_log_proto_depIdxs = []int32{
 	2, // 0: loom.v1.GetLogsResponse.logs:type_name -> loom.v1.Log
 	5, // 1: loom.v1.GetLogsRequest.filter:type_name -> loom.v1.LogFilter
-	0, // 2: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
-	4, // 3: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
-	6, // 4: loom.v1.LogService.StreamLogs:input_type -> loom.v1.StreamLogsRequest
-	1, // 5: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
-	3, // 6: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
-	2, // 7: loom.v1.LogService.StreamLogs:output_type -> loom.v1.Log
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	5, // 2: loom.v1.StreamLogsRequest.filter:type_name -> loom.v1.LogFilter
+	0, // 3: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
+	4, // 4: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
+	6, // 5: loom.v1.LogService.StreamLogs:input_type -> loom.v1.StreamLogsRequest
+	1, // 6: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
+	3, // 7: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
+	2, // 8: loom.v1.LogService.StreamLogs:output_type -> loom.v1.Log
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_proto_log_proto_init() }
