@@ -53,32 +53,6 @@ func (a *Agent) Run() {
 		}
 
 		fmt.Println(resp.Message)
-
-		//DUMMY FILTER
-		filter := a.cfg.Service.Name
-
-		logResp, err := a.client.GetLogs(
-			context.Background(),
-			&pb.GetLogsRequest{
-				Limit: a.cfg.Query.Limit,
-				Filter: &pb.LogFilter{
-					ServiceName: &filter,
-				},
-			},
-		)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, logEntry := range logResp.Logs {
-			fmt.Printf(
-				"[%s] %s\n",
-				logEntry.Level,
-				logEntry.Message,
-			)
-		}
-
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

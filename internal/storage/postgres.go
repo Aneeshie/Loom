@@ -85,10 +85,12 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 
 	query += fmt.Sprintf(" LIMIT $%d", len(args))
 
+	query += " ORDER BY timestamp DESC"
+
 	rows, err := s.db.Query(
 		ctx,
 		query,
-		args,
+		args...,
 	)
 
 	if err != nil {
