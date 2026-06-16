@@ -381,6 +381,42 @@ func (x *LogFilter) GetHost() string {
 	return ""
 }
 
+type StreamLogsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamLogsRequest) Reset() {
+	*x = StreamLogsRequest{}
+	mi := &file_proto_log_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamLogsRequest) ProtoMessage() {}
+
+func (x *StreamLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_log_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamLogsRequest.ProtoReflect.Descriptor instead.
+func (*StreamLogsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_log_proto_rawDescGZIP(), []int{6}
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -412,11 +448,14 @@ const file_proto_log_proto_rawDesc = "" +
 	"\x04host\x18\x03 \x01(\tH\x02R\x04host\x88\x01\x01B\b\n" +
 	"\x06_levelB\x0f\n" +
 	"\r_service_nameB\a\n" +
-	"\x05_host2\x88\x01\n" +
+	"\x05_host\"\x13\n" +
+	"\x11StreamLogsRequest2\xc2\x01\n" +
 	"\n" +
 	"LogService\x12<\n" +
 	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +
-	"\aGetLogs\x12\x17.loom.v1.GetLogsRequest\x1a\x18.loom.v1.GetLogsResponseB Z\x1egithub.com/Aneeshie/loom/protob\x06proto3"
+	"\aGetLogs\x12\x17.loom.v1.GetLogsRequest\x1a\x18.loom.v1.GetLogsResponse\x128\n" +
+	"\n" +
+	"StreamLogs\x12\x1a.loom.v1.StreamLogsRequest\x1a\f.loom.v1.Log0\x01B Z\x1egithub.com/Aneeshie/loom/protob\x06proto3"
 
 var (
 	file_proto_log_proto_rawDescOnce sync.Once
@@ -430,24 +469,27 @@ func file_proto_log_proto_rawDescGZIP() []byte {
 	return file_proto_log_proto_rawDescData
 }
 
-var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_proto_log_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_proto_log_proto_goTypes = []any{
-	(*SendLogRequest)(nil),  // 0: loom.v1.SendLogRequest
-	(*SendLogResponse)(nil), // 1: loom.v1.SendLogResponse
-	(*Log)(nil),             // 2: loom.v1.Log
-	(*GetLogsResponse)(nil), // 3: loom.v1.GetLogsResponse
-	(*GetLogsRequest)(nil),  // 4: loom.v1.GetLogsRequest
-	(*LogFilter)(nil),       // 5: loom.v1.LogFilter
+	(*SendLogRequest)(nil),    // 0: loom.v1.SendLogRequest
+	(*SendLogResponse)(nil),   // 1: loom.v1.SendLogResponse
+	(*Log)(nil),               // 2: loom.v1.Log
+	(*GetLogsResponse)(nil),   // 3: loom.v1.GetLogsResponse
+	(*GetLogsRequest)(nil),    // 4: loom.v1.GetLogsRequest
+	(*LogFilter)(nil),         // 5: loom.v1.LogFilter
+	(*StreamLogsRequest)(nil), // 6: loom.v1.StreamLogsRequest
 }
 var file_proto_log_proto_depIdxs = []int32{
 	2, // 0: loom.v1.GetLogsResponse.logs:type_name -> loom.v1.Log
 	5, // 1: loom.v1.GetLogsRequest.filter:type_name -> loom.v1.LogFilter
 	0, // 2: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
 	4, // 3: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
-	1, // 4: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
-	3, // 5: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
+	6, // 4: loom.v1.LogService.StreamLogs:input_type -> loom.v1.StreamLogsRequest
+	1, // 5: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
+	3, // 6: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
+	2, // 7: loom.v1.LogService.StreamLogs:output_type -> loom.v1.Log
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -465,7 +507,7 @@ func file_proto_log_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_log_proto_rawDesc), len(file_proto_log_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

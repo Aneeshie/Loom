@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/Aneeshie/loom/internal/agent"
@@ -12,11 +13,12 @@ import (
 )
 
 var (
-	server = flag.String("server", "localhost:8080", "server address")
-	level = flag.String("level", "", "filter by log level")
+	server  = flag.String("server", "localhost:8080", "server address")
+	level   = flag.String("level", "", "filter by log level")
 	service = flag.String("service", "", "filter by service name")
-	host = flag.String("host", "", "filter by host")
-	limit = flag.Int64("limit", 20, "max results")
+	host    = flag.String("host", "", "filter by host")
+	limit   = flag.Int64("limit", 20, "max results")
+	follow  = flag.Bool("follow", false, "Follow logs in realtime")
 )
 
 func main() {
@@ -27,8 +29,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var filter *pb.LogFilter
+	if *follow {
+		runFollow(client)
+		return
+	}
 
+	var filter *pb.LogFilter
 
 	if *level != "" || *service != "" || *host != "" {
 
@@ -36,7 +42,7 @@ func main() {
 
 		if *level != "" {
 
-			filter.Level = level  // already a *string
+			filter.Level = level // already a *string
 
 		}
 
@@ -54,8 +60,8 @@ func main() {
 
 	}
 
-	resp, err := client.GetLogs(context.Background(),&pb.GetLogsRequest{
-		Limit: *limit,
+	resp, err := client.GetLogs(context.Background(), &pb.GetLogsRequest{
+		Limit:  *limit,
 		Filter: filter,
 	})
 
@@ -73,5 +79,33 @@ func main() {
 
 	for _, log := range resp.Logs {
 		fmt.Printf("[%s] %s - %s - %d\n", log.Level, log.ServiceName, log.Message, log.Timestamp)
+	}
+
+}
+
+func runFollow(client pb.LogServiceClient) {
+	stream, err := client.StreamLogs(context.Background(), &pb.StreamLogsRequest{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		logEntry, err := stream.Recv()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf(
+			"[%s] %s - %s\n",
+			logEntry.Level,
+			logEntry.ServiceName,
+			logEntry.Message,
+		)
 	}
 }

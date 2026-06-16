@@ -40,8 +40,12 @@ message LogFilter {
   optional string host = 3;
 }
 
+message StreamLogsRequest{}
+
 service LogService {
   rpc SendLog(SendLogRequest) returns (SendLogResponse);
 
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+
+  rpc StreamLogs(StreamLogsRequest) returns (stream Log);
 }

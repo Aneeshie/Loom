@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	LogService_SendLog_FullMethodName = "/loom.v1.LogService/SendLog"
-	LogService_GetLogs_FullMethodName = "/loom.v1.LogService/GetLogs"
+	LogService_SendLog_FullMethodName    = "/loom.v1.LogService/SendLog"
+	LogService_GetLogs_FullMethodName    = "/loom.v1.LogService/GetLogs"
+	LogService_StreamLogs_FullMethodName = "/loom.v1.LogService/StreamLogs"
 )
 
 // LogServiceClient is the client API for LogService service.
@@ -29,6 +30,7 @@ const (
 type LogServiceClient interface {
 	SendLog(ctx context.Context, in *SendLogRequest, opts ...grpc.CallOption) (*SendLogResponse, error)
 	GetLogs(ctx context.Context, in *GetLogsRequest, opts ...grpc.CallOption) (*GetLogsResponse, error)
+	StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Log], error)
 }
 
 type logServiceClient struct {
@@ -59,12 +61,32 @@ func (c *logServiceClient) GetLogs(ctx context.Context, in *GetLogsRequest, opts
 	return out, nil
 }
 
+func (c *logServiceClient) StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Log], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &LogService_ServiceDesc.Streams[0], LogService_StreamLogs_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamLogsRequest, Log]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LogService_StreamLogsClient = grpc.ServerStreamingClient[Log]
+
 // LogServiceServer is the server API for LogService service.
 // All implementations must embed UnimplementedLogServiceServer
 // for forward compatibility.
 type LogServiceServer interface {
 	SendLog(context.Context, *SendLogRequest) (*SendLogResponse, error)
 	GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error)
+	StreamLogs(*StreamLogsRequest, grpc.ServerStreamingServer[Log]) error
 	mustEmbedUnimplementedLogServiceServer()
 }
 
@@ -80,6 +102,9 @@ func (UnimplementedLogServiceServer) SendLog(context.Context, *SendLogRequest) (
 }
 func (UnimplementedLogServiceServer) GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLogs not implemented")
+}
+func (UnimplementedLogServiceServer) StreamLogs(*StreamLogsRequest, grpc.ServerStreamingServer[Log]) error {
+	return status.Error(codes.Unimplemented, "method StreamLogs not implemented")
 }
 func (UnimplementedLogServiceServer) mustEmbedUnimplementedLogServiceServer() {}
 func (UnimplementedLogServiceServer) testEmbeddedByValue()                    {}
@@ -138,6 +163,17 @@ func _LogService_GetLogs_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LogService_StreamLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamLogsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(LogServiceServer).StreamLogs(m, &grpc.GenericServerStream[StreamLogsRequest, Log]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type LogService_StreamLogsServer = grpc.ServerStreamingServer[Log]
+
 // LogService_ServiceDesc is the grpc.ServiceDesc for LogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,6 +190,12 @@ var LogService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LogService_GetLogs_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamLogs",
+			Handler:       _LogService_StreamLogs_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto/log.proto",
 }
