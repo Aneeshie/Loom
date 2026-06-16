@@ -1,11 +1,10 @@
 package agent
 
 import (
-	"fmt"
 	"strings"
 )
 
-func ParseLogLine(logLine string) (string, string, error) {
+func ParseLogLine(logLine string) (string, string) {
 
 	start := strings.Index(logLine, "[")
 	end := strings.Index(logLine, "]")
@@ -15,8 +14,9 @@ func ParseLogLine(logLine string) (string, string, error) {
 
 		message := strings.TrimSpace(logLine[end+1:])
 
-		return level, message, nil
+		return level, message
 
 	}
-	return "", "", fmt.Errorf("invalid format")
+
+	return "RAW", logLine
 }

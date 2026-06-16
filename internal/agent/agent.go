@@ -38,11 +38,7 @@ func (a *Agent) Run() {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		level, message, err := ParseLogLine(line)
-		if err != nil {
-			log.Printf("failed to send log: %v", err)
-			continue
-		}
+		level, message := ParseLogLine(line)
 
 		resp, err := a.client.SendLog(context.Background(), &pb.SendLogRequest{
 			ServiceName: a.cfg.Service.Name,
