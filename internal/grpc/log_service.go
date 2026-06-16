@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"sync"
 
 	"github.com/Aneeshie/loom/internal/storage"
 	pb "github.com/Aneeshie/loom/proto"
@@ -12,6 +13,7 @@ type LogService struct {
 	pb.UnimplementedLogServiceServer
 	store *storage.Store
 
+	mu          sync.RWMutex
 	subscribers map[*Subscriber]struct{}
 }
 
@@ -62,9 +64,15 @@ func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStr
 		ch: make(chan *pb.Log),
 	}
 
+	s.mu.Lock()
 	s.subscribers[sub] = struct{}{}
+	s.mu.Unlock()
+
+	s.mu.Lock()
 
 	defer delete(s.subscribers, sub)
+
+	s.mu.Unlock()
 
 	for {
 		log := <-sub.ch
@@ -79,7 +87,10 @@ func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStr
 }
 
 func (s *LogService) broadcast(log *pb.Log) {
+	s.mu.Lock()
 	for sub := range s.subscribers {
 		sub.ch <- log
 	}
+
+	s.mu.RUnlock()
 }
