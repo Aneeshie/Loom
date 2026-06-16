@@ -61,7 +61,7 @@ func (s *LogService) GetLogs(ctx context.Context, req *pb.GetLogsRequest) (*pb.G
 
 func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStreamingServer[pb.Log]) error {
 	sub := &Subscriber{
-		ch:     make(chan *pb.Log),
+		ch:     make(chan *pb.Log, 100), // HARDCODING FOR NOW
 		filter: req.Filter,
 	}
 
@@ -69,19 +69,22 @@ func (s *LogService) StreamLogs(req *pb.StreamLogsRequest, stream grpc.ServerStr
 	s.subscribers[sub] = struct{}{}
 	s.mu.Unlock()
 
-	s.mu.Lock()
+	defer func() {
+		s.mu.Lock()
+		delete(s.subscribers, sub)
+		s.mu.Unlock()
+	}()
 
-	defer delete(s.subscribers, sub)
-
-	s.mu.Unlock()
+	ctx := stream.Context()
 
 	for {
-		log := <-sub.ch
-
-		err := stream.Send(log)
-
-		if err != nil {
-			return err
+		select {
+		case <-ctx.Done():
+			return nil
+		case log := <-sub.ch:
+			if err := stream.Send(log); err != nil {
+				return err
+			}
 		}
 	}
 
