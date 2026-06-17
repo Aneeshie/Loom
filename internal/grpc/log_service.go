@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Aneeshie/loom/internal/embeddings"
 	"github.com/Aneeshie/loom/internal/storage"
 	pb "github.com/Aneeshie/loom/proto"
 	"google.golang.org/grpc"
@@ -16,19 +17,28 @@ type LogService struct {
 
 	mu          sync.RWMutex
 	subscribers map[*Subscriber]struct{}
+
+	embedder embeddings.Embedder
 }
 
-func NewLogService(store *storage.Store) *LogService {
+func NewLogService(store *storage.Store, embedder embeddings.Embedder) *LogService {
 	return &LogService{
 		store: store,
 
 		subscribers: make(map[*Subscriber]struct{}),
+
+		embedder: embedder,
 	}
 }
 
 func (s *LogService) SendLog(ctx context.Context, req *pb.SendLogRequest) (*pb.SendLogResponse, error) {
 
-	err := s.store.InsertLog(ctx, req)
+	embedding, err := s.embedder.Embed(ctx, req.Message)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.store.InsertLog(ctx, req, embedding)
 
 	if err != nil {
 		return nil, err

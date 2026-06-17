@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Aneeshie/loom/internal/config"
+	"github.com/Aneeshie/loom/internal/embeddings"
 	"github.com/Aneeshie/loom/internal/grpc"
 	"github.com/Aneeshie/loom/internal/storage"
 )
@@ -22,7 +23,9 @@ func main() {
 
 	defer store.CloseConnection()
 
-	logService := grpc.NewLogService(store)
+	embedder := embeddings.NewOllamaEmbedder("nomic-embed-text")
+
+	logService := grpc.NewLogService(store, embedder)
 
 	server := grpc.NewServer(logService)
 	server.Run()

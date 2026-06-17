@@ -7,6 +7,7 @@ import (
 
 	pb "github.com/Aneeshie/loom/proto"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pgvector/pgvector-go"
 )
 
 type Store struct {
@@ -25,7 +26,10 @@ func NewStore(databaseURL string) (*Store, error) {
 	}, nil
 }
 
-func (s *Store) InsertLog(ctx context.Context, req *pb.SendLogRequest) error {
+func (s *Store) InsertLog(ctx context.Context, req *pb.SendLogRequest, embedding []float32) error {
+
+	vec := pgvector.NewVector(embedding)
+
 	_, err := s.db.Exec(
 		ctx,
 		`
@@ -34,15 +38,17 @@ func (s *Store) InsertLog(ctx context.Context, req *pb.SendLogRequest) error {
 		host,
 		level,
 		message,
-		timestamp
+		timestamp,
+		embedding
 		)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		`,
 		req.ServiceName,
 		req.Host,
 		req.Level,
 		req.Message,
 		req.Timestamp,
+		vec,
 	)
 
 	return err
