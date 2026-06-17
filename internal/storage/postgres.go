@@ -90,6 +90,11 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 			conditions = append(conditions, fmt.Sprintf("message ILIKE $%d", len(args)+1))
 			args = append(args, "%"+*filter.Search+"%")
 		}
+
+		if filter.StartTime != nil {
+			conditions = append(conditions, fmt.Sprintf("timestamp >= $%d", len(args)+1))
+			args = append(args, *filter.StartTime)
+		}
 	}
 
 	if len(conditions) > 0 {

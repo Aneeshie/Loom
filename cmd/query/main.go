@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/Aneeshie/loom/internal/agent"
 
@@ -20,6 +21,7 @@ var (
 	limit   = flag.Int64("limit", 20, "max results")
 	follow  = flag.Bool("follow", false, "Follow logs in realtime")
 	search  = flag.String("search", "", "search logs by message")
+	since   = flag.Duration("since", 0, "show logs since duration (e.g. 1h, 24h, 7m)")
 )
 
 func main() {
@@ -56,6 +58,10 @@ func main() {
 
 		if *search != "" {
 			filter.Search = search
+		}
+
+		if *since != 0 {
+			filter.StartTime = new(time.Now().Add(-*since).Unix())
 		}
 
 	}
