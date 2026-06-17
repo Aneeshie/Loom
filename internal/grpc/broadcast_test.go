@@ -32,7 +32,7 @@ func TestBroadcast(t *testing.T) {
 		{
 			name: "mismatching level does not receive",
 			filter: &pb.LogFilter{
-				Level: strPtr("ERROR"),
+				Level: new("ERROR"),
 			},
 			log: &pb.Log{
 				Level: "INFO",

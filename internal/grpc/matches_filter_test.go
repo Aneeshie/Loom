@@ -170,6 +170,80 @@ func TestMatchesFilter(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "search match",
+			log: &pb.Log{
+				Message: "database connection established",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("database"),
+			},
+			want: true,
+		},
+		{
+			name: "search mismatch",
+			log: &pb.Log{
+				Message: "user logged in",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("database"),
+			},
+			want: false,
+		},
+		{
+			name: "search case insensitive",
+			log: &pb.Log{
+				Message: "Database connection established",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("database"),
+			},
+			want: true,
+		},
+		{
+			name: "search and level match",
+			log: &pb.Log{
+				Message: "database timeout",
+				Level:   "ERROR",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("database"),
+				Level:  strPtr("ERROR"),
+			},
+			want: true,
+		},
+		{
+			name: "search and level mismatch",
+			log: &pb.Log{
+				Message: "database timeout",
+				Level:   "INFO",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("database"),
+				Level:  strPtr("ERROR"),
+			},
+			want: false,
+		},
+		{
+			name: "search substring match",
+			log: &pb.Log{
+				Message: "database timeout while connecting",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr("timeout"),
+			},
+			want: true,
+		},
+		{
+			name: "empty search matches everything",
+			log: &pb.Log{
+				Message: "database timeout",
+			},
+			filter: &pb.LogFilter{
+				Search: strPtr(""),
+			},
+			want: true,
+		},
 	}
 
 	for _, tt := range tests {
