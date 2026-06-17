@@ -38,6 +38,8 @@ message LogFilter {
   optional string level = 1;
   optional string service_name = 2;
   optional string host = 3;
+
+  optional string search = 4;
 }
 
 message StreamLogsRequest {

@@ -8,6 +8,7 @@ import (
 	pb "github.com/Aneeshie/loom/proto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
 type Store struct {
 	db *pgxpool.Pool
 }
@@ -56,7 +57,16 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 		return nil, fmt.Errorf("Limit too high, should be under 100 and above 0")
 	}
 
-	query := "SELECT id, service_name, host, level, message, timestamp FROM logs"
+	query := `
+		SELECT
+			id,
+			service_name,
+			host,
+			level,
+			message,
+			timestamp
+		FROM logs
+	`
 
 	var args []any
 
@@ -75,16 +85,22 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 			conditions = append(conditions, fmt.Sprintf("host = $%d", len(args)+1))
 			args = append(args, *filter.Host)
 		}
+
+		if filter.Search != nil {
+			conditions = append(conditions, fmt.Sprintf("message ILIKE $%d", len(args)+1))
+			args = append(args, "%"+*filter.Search+"%")
+		}
 	}
 
 	if len(conditions) > 0 {
-		 query += " WHERE " + strings.Join(conditions, " AND ")
+		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
 	args = append(args, limit)
 
-	query += fmt.Sprintf(" LIMIT $%d", len(args))
+	query += " ORDER BY timestamp DESC"
 
+	query += fmt.Sprintf(" LIMIT $%d", len(args))
 
 	rows, err := s.db.Query(
 		ctx,
@@ -103,28 +119,27 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 	for rows.Next() {
 		logEntry := &pb.Log{}
 
-    err := rows.Scan(
+		err := rows.Scan(
 
-        &logEntry.Id,
+			&logEntry.Id,
 
-        &logEntry.ServiceName,
+			&logEntry.ServiceName,
 
-        &logEntry.Host,
+			&logEntry.Host,
 
-        &logEntry.Level,
+			&logEntry.Level,
 
-        &logEntry.Message,
+			&logEntry.Message,
 
-        &logEntry.Timestamp,
+			&logEntry.Timestamp,
+		)
+		if err != nil {
 
-    )
-		 if err != nil {
+			return nil, err
 
-        return nil, err
+		}
 
-    }
-
-    logs = append(logs, logEntry)
+		logs = append(logs, logEntry)
 	}
 
 	if err := rows.Err(); err != nil {

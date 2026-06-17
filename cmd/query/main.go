@@ -19,6 +19,7 @@ var (
 	host    = flag.String("host", "", "filter by host")
 	limit   = flag.Int64("limit", 20, "max results")
 	follow  = flag.Bool("follow", false, "Follow logs in realtime")
+	search  = flag.String("search", "", "search logs by message")
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 
 	var filter *pb.LogFilter
 
-	if *level != "" || *service != "" || *host != "" {
+	if *level != "" || *service != "" || *host != "" || *search != "" {
 
 		filter = &pb.LogFilter{}
 
@@ -51,6 +52,10 @@ func main() {
 
 			filter.Host = host
 
+		}
+
+		if *search != "" {
+			filter.Search = search
 		}
 
 	}

@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	"github.com/Aneeshie/loom/internal/storage"
@@ -118,6 +119,10 @@ func matchesFilter(log *pb.Log, filter *pb.LogFilter) bool {
 
 	if filter.Host != nil &&
 		log.Host != *filter.Host {
+		return false
+	}
+
+	if filter.Search != nil && !strings.Contains(strings.ToLower(log.Message), strings.ToLower(*filter.Search)) {
 		return false
 	}
 

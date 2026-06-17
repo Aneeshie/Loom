@@ -326,6 +326,7 @@ type LogFilter struct {
 	Level         *string                `protobuf:"bytes,1,opt,name=level,proto3,oneof" json:"level,omitempty"`
 	ServiceName   *string                `protobuf:"bytes,2,opt,name=service_name,json=serviceName,proto3,oneof" json:"service_name,omitempty"`
 	Host          *string                `protobuf:"bytes,3,opt,name=host,proto3,oneof" json:"host,omitempty"`
+	Search        *string                `protobuf:"bytes,4,opt,name=search,proto3,oneof" json:"search,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -377,6 +378,13 @@ func (x *LogFilter) GetServiceName() string {
 func (x *LogFilter) GetHost() string {
 	if x != nil && x.Host != nil {
 		return *x.Host
+	}
+	return ""
+}
+
+func (x *LogFilter) GetSearch() string {
+	if x != nil && x.Search != nil {
+		return *x.Search
 	}
 	return ""
 }
@@ -449,14 +457,16 @@ const file_proto_log_proto_rawDesc = "" +
 	"\x04logs\x18\x01 \x03(\v2\f.loom.v1.LogR\x04logs\"R\n" +
 	"\x0eGetLogsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x03R\x05limit\x12*\n" +
-	"\x06filter\x18\x02 \x01(\v2\x12.loom.v1.LogFilterR\x06filter\"\x8b\x01\n" +
+	"\x06filter\x18\x02 \x01(\v2\x12.loom.v1.LogFilterR\x06filter\"\xb3\x01\n" +
 	"\tLogFilter\x12\x19\n" +
 	"\x05level\x18\x01 \x01(\tH\x00R\x05level\x88\x01\x01\x12&\n" +
 	"\fservice_name\x18\x02 \x01(\tH\x01R\vserviceName\x88\x01\x01\x12\x17\n" +
-	"\x04host\x18\x03 \x01(\tH\x02R\x04host\x88\x01\x01B\b\n" +
+	"\x04host\x18\x03 \x01(\tH\x02R\x04host\x88\x01\x01\x12\x1b\n" +
+	"\x06search\x18\x04 \x01(\tH\x03R\x06search\x88\x01\x01B\b\n" +
 	"\x06_levelB\x0f\n" +
 	"\r_service_nameB\a\n" +
-	"\x05_host\"?\n" +
+	"\x05_hostB\t\n" +
+	"\a_search\"?\n" +
 	"\x11StreamLogsRequest\x12*\n" +
 	"\x06filter\x18\x01 \x01(\v2\x12.loom.v1.LogFilterR\x06filter2\xc2\x01\n" +
 	"\n" +
