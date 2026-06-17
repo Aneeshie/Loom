@@ -33,11 +33,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *similar != "" {
-		runSemanticSearch(client, *similar, *limit)
-		return
-	}
-
 	var filter *pb.LogFilter
 
 	if *level != "" || *service != "" || *host != "" || *search != "" {
@@ -70,6 +65,11 @@ func main() {
 			filter.StartTime = new(time.Now().Add(-*since).Unix())
 		}
 
+	}
+
+	if *similar != "" {
+		runSemanticSearch(client, *similar, *limit, filter)
+		return
 	}
 
 	if *follow {
@@ -129,8 +129,8 @@ func runFollow(client pb.LogServiceClient, filter *pb.LogFilter) {
 	}
 }
 
-func runSemanticSearch(client pb.LogServiceClient, query string, limit int64) {
-	resp, err := client.SimilarLogs(context.Background(), &pb.SimilarLogsRequest{Query: query, Limit: limit})
+func runSemanticSearch(client pb.LogServiceClient, query string, limit int64, filter *pb.LogFilter) {
+	resp, err := client.SimilarLogs(context.Background(), &pb.SimilarLogsRequest{Query: query, Limit: limit, Filter: filter})
 	if err != nil {
 		log.Fatal(err)
 	}

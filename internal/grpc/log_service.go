@@ -154,6 +154,7 @@ func (s *LogService) SimilarLogs(ctx context.Context, req *pb.SimilarLogsRequest
 		ctx,
 		embedding,
 		req.Limit,
+		req.Filter,
 	)
 
 	if err != nil {

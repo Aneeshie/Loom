@@ -445,6 +445,7 @@ type SimilarLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
 	Limit         int64                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Filter        *LogFilter             `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -493,6 +494,13 @@ func (x *SimilarLogsRequest) GetLimit() int64 {
 	return 0
 }
 
+func (x *SimilarLogsRequest) GetFilter() *LogFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
 var File_proto_log_proto protoreflect.FileDescriptor
 
 const file_proto_log_proto_rawDesc = "" +
@@ -531,10 +539,11 @@ const file_proto_log_proto_rawDesc = "" +
 	"\a_searchB\r\n" +
 	"\v_start_time\"?\n" +
 	"\x11StreamLogsRequest\x12*\n" +
-	"\x06filter\x18\x01 \x01(\v2\x12.loom.v1.LogFilterR\x06filter\"@\n" +
+	"\x06filter\x18\x01 \x01(\v2\x12.loom.v1.LogFilterR\x06filter\"l\n" +
 	"\x12SimilarLogsRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x03R\x05limit2\x88\x02\n" +
+	"\x05limit\x18\x02 \x01(\x03R\x05limit\x12*\n" +
+	"\x06filter\x18\x03 \x01(\v2\x12.loom.v1.LogFilterR\x06filter2\x88\x02\n" +
 	"\n" +
 	"LogService\x12<\n" +
 	"\aSendLog\x12\x17.loom.v1.SendLogRequest\x1a\x18.loom.v1.SendLogResponse\x12<\n" +
@@ -570,19 +579,20 @@ var file_proto_log_proto_depIdxs = []int32{
 	2, // 0: loom.v1.GetLogsResponse.logs:type_name -> loom.v1.Log
 	5, // 1: loom.v1.GetLogsRequest.filter:type_name -> loom.v1.LogFilter
 	5, // 2: loom.v1.StreamLogsRequest.filter:type_name -> loom.v1.LogFilter
-	0, // 3: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
-	4, // 4: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
-	6, // 5: loom.v1.LogService.StreamLogs:input_type -> loom.v1.StreamLogsRequest
-	7, // 6: loom.v1.LogService.SimilarLogs:input_type -> loom.v1.SimilarLogsRequest
-	1, // 7: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
-	3, // 8: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
-	2, // 9: loom.v1.LogService.StreamLogs:output_type -> loom.v1.Log
-	3, // 10: loom.v1.LogService.SimilarLogs:output_type -> loom.v1.GetLogsResponse
-	7, // [7:11] is the sub-list for method output_type
-	3, // [3:7] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	5, // 3: loom.v1.SimilarLogsRequest.filter:type_name -> loom.v1.LogFilter
+	0, // 4: loom.v1.LogService.SendLog:input_type -> loom.v1.SendLogRequest
+	4, // 5: loom.v1.LogService.GetLogs:input_type -> loom.v1.GetLogsRequest
+	6, // 6: loom.v1.LogService.StreamLogs:input_type -> loom.v1.StreamLogsRequest
+	7, // 7: loom.v1.LogService.SimilarLogs:input_type -> loom.v1.SimilarLogsRequest
+	1, // 8: loom.v1.LogService.SendLog:output_type -> loom.v1.SendLogResponse
+	3, // 9: loom.v1.LogService.GetLogs:output_type -> loom.v1.GetLogsResponse
+	2, // 10: loom.v1.LogService.StreamLogs:output_type -> loom.v1.Log
+	3, // 11: loom.v1.LogService.SimilarLogs:output_type -> loom.v1.GetLogsResponse
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_log_proto_init() }
