@@ -1,4 +1,8 @@
-.PHONY: proto migrate-up migrate-down proto
+.PHONY: proto migrate-up migrate-down proto migate-create
+
+migrate-create:
+	@test -n "$(NAME)" || (echo "Usage: make migrate-create NAME=migration_name" && exit 1)
+	migrate create -ext sql -dir migrations $(NAME)
 
 migrate-up:
 	migrate -path migrations -database "$(DATABASE_URL)" up

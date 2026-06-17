@@ -38,6 +38,10 @@ func (a *Agent) Run() {
 	for scanner.Scan() {
 		line := scanner.Text()
 
+		if line == "" {
+			continue
+		}
+
 		level, message := ParseLogLine(line)
 
 		resp, err := a.client.SendLog(context.Background(), &pb.SendLogRequest{
