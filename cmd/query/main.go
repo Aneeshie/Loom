@@ -22,6 +22,7 @@ var (
 	follow  = flag.Bool("follow", false, "Follow logs in realtime")
 	search  = flag.String("search", "", "search logs by message")
 	since   = flag.Duration("since", 0, "show logs since duration (e.g. 1h, 24h, 7m)")
+	similar = flag.String("similar", "", "semantic search query")
 )
 
 func main() {
@@ -30,6 +31,11 @@ func main() {
 	client, err := agent.NewClient(*server)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if *similar != "" {
+		runSemanticSearch(client, *similar, *limit)
+		return
 	}
 
 	var filter *pb.LogFilter
@@ -114,6 +120,22 @@ func runFollow(client pb.LogServiceClient, filter *pb.LogFilter) {
 			log.Fatal(err)
 		}
 
+		fmt.Printf(
+			"[%s] %s - %s\n",
+			logEntry.Level,
+			logEntry.ServiceName,
+			logEntry.Message,
+		)
+	}
+}
+
+func runSemanticSearch(client pb.LogServiceClient, query string, limit int64) {
+	resp, err := client.SimilarLogs(context.Background(), &pb.SimilarLogsRequest{Query: query, Limit: limit})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, logEntry := range resp.Logs {
 		fmt.Printf(
 			"[%s] %s - %s\n",
 			logEntry.Level,

@@ -10,6 +10,8 @@ import (
 	"github.com/pgvector/pgvector-go"
 )
 
+const SIMILARITY_THRESHOLD = 0.45
+
 type Store struct {
 	db *pgxpool.Pool
 }
@@ -161,4 +163,74 @@ func (s *Store) GetLogs(ctx context.Context, limit int64, filter *pb.LogFilter) 
 
 	return logs, nil
 
+}
+
+func (s *Store) SimilarLogs(ctx context.Context, embedding []float32, limit int64) ([]*pb.Log, error) {
+
+	fmt.Println("entered similar logs")
+
+	query := `SELECT
+			id,
+			service_name,
+			host,
+			level,
+			message,
+			timestamp,
+			embedding <=> $1 AS distance
+		FROM logs
+		ORDER BY distance
+		LIMIT $2`
+
+	rows, err := s.db.Query(
+		ctx,
+		query,
+		pgvector.NewVector(embedding),
+		limit,
+	)
+
+	var distance float64
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var logs []*pb.Log
+
+	for rows.Next() {
+		logEntry := &pb.Log{}
+
+		err := rows.Scan(
+			&logEntry.Id,
+			&logEntry.ServiceName,
+			&logEntry.Host,
+			&logEntry.Level,
+			&logEntry.Message,
+			&logEntry.Timestamp,
+			&distance,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if distance > SIMILARITY_THRESHOLD {
+			continue
+		}
+
+		fmt.Printf(
+			"distance=%.4f message=%s\n",
+			distance,
+			logEntry.Message,
+		)
+
+		logs = append(logs, logEntry)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return logs, nil
 }

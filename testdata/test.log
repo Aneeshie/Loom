@@ -1,4 +1,44 @@
 [INFO] Server started
+[INFO] HTTP server listening on port 8080
+[INFO] Application boot completed
+
 [INFO] Database connected
+[INFO] PostgreSQL connection established
+[INFO] Connected to primary database
+
 [ERROR] Failed to connect to Redis
+[ERROR] Redis connection timeout
+[ERROR] Unable to reach cache server
+[ERROR] Cache backend unavailable
+
 [INFO] User logged in
+[INFO] Authentication successful
+[INFO] Session created for user 123
+
+[WARN] High memory usage detected
+[WARN] Memory consumption exceeded 80%
+[WARN] Container nearing memory limit
+
+[ERROR] Database connection timeout
+[ERROR] Query execution exceeded timeout
+[ERROR] Connection pool exhausted
+[ERROR] PostgreSQL unavailable
+
+[INFO] Payment processed successfully
+[INFO] Transaction completed
+[INFO] Order checkout succeeded
+
+[ERROR] Payment gateway unavailable
+[ERROR] Stripe API request failed
+[ERROR] Failed to process payment
+
+[WARN] API rate limit approaching threshold
+[WARN] Request quota nearly exhausted
+
+[ERROR] JWT validation failed
+[ERROR] Invalid authentication token
+[ERROR] User authorization denied
+
+[INFO] Background worker started
+[INFO] Job scheduler initialized
+[INFO] Worker pool ready

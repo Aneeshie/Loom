@@ -15,7 +15,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	store, err := storage.NewStore(cfg.Database.URL)
 	if err != nil {
 		log.Fatal(err)

@@ -139,3 +139,28 @@ func matchesFilter(log *pb.Log, filter *pb.LogFilter) bool {
 	return true
 
 }
+
+func (s *LogService) SimilarLogs(ctx context.Context, req *pb.SimilarLogsRequest) (*pb.GetLogsResponse, error) {
+	embedding, err := s.embedder.Embed(
+		ctx,
+		req.Query,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logs, err := s.store.SimilarLogs(
+		ctx,
+		embedding,
+		req.Limit,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetLogsResponse{
+		Logs: logs,
+	}, nil
+}
