@@ -1,14 +1,15 @@
 # Loom
 
-Loom is a distributed log aggregation system built with Go, gRPC, and PostgreSQL.
+Loom is a distributed log aggregation system built with Go, gRPC, PostgreSQL, and pgvector.
 
 It provides:
 
 * Log ingestion through lightweight agents
 * Centralized log storage in PostgreSQL
-* Historical log querying with filtering and pagination
+* Historical log querying with filtering
 * Realtime log streaming
-* Realtime filtered subscriptions
+* Semantic log search using vector embeddings
+* Hybrid search combining semantic retrieval and structured filters
 
 ---
 
@@ -25,10 +26,11 @@ It provides:
 |   Loom Server  |
 +----------------+
      |
+     | Embeddings
      v
-+------------+
-| PostgreSQL |
-+------------+
++------------------------+
+| PostgreSQL + pgvector |
++------------------------+
 
      ^
      |
@@ -38,23 +40,27 @@ It provides:
 +--------+
 ```
 
-### Components
+---
 
-#### Agent
+## Components
+
+### Agent
 
 Reads logs from a source file, parses them, and sends them to the server using gRPC.
 
-#### Server
+### Server
 
-Receives logs from agents, stores them in PostgreSQL, and streams logs to subscribed clients.
+Receives logs from agents, generates vector embeddings, stores logs in PostgreSQL, and streams logs to subscribed clients.
 
-#### Query
+### Query
 
 CLI tool used to:
 
 * Query historical logs
 * Filter logs
 * Follow logs in realtime
+* Perform semantic search
+* Perform hybrid search
 
 ---
 
@@ -71,36 +77,90 @@ Retrieve logs using filters such as:
 * Log level
 * Service name
 * Host
+* Time range
+
+```bash
+go run ./cmd/query --level INFO
+```
+
+---
+
+### Semantic Search
+
+Search logs by meaning instead of exact keywords.
+
+```bash
+go run ./cmd/query --similar "database timeout"
+```
+
+Example matches:
+
+```text
+Database connection timeout
+Query execution exceeded timeout
+PostgreSQL unavailable
+Connection pool exhausted
+```
+
+---
+
+### Hybrid Search
+
+Combine semantic search with structured filters.
+
+```bash
+go run ./cmd/query \
+  --similar "database timeout" \
+  --level ERROR
+```
 
 Example:
 
-```bash
-go run ./cmd/query -level INFO
+```text
+Database connection timeout
+Query execution exceeded timeout
+PostgreSQL unavailable
 ```
 
-### Pagination
-
-Limit the number of returned logs:
-
-```bash
-go run ./cmd/query -limit 20
-```
+---
 
 ### Realtime Streaming
 
-Follow logs as they arrive:
+Follow logs as they arrive.
 
 ```bash
 go run ./cmd/query --follow
 ```
 
-### Realtime Filtering
+---
 
-Subscribe only to logs matching specific criteria:
+### Realtime Filtered Streaming
+
+Subscribe only to logs matching specific filters.
 
 ```bash
-go run ./cmd/query --follow -level ERROR
+go run ./cmd/query \
+  --follow \
+  --level ERROR
 ```
+
+---
+
+## Semantic Search Pipeline
+
+```text
+Query
+ ↓
+Embedding Generation
+ ↓
+Vector Similarity Search
+ ↓
+Structured Filtering
+ ↓
+Ranked Results
+```
+
+Logs are embedded using Ollama and stored as 768-dimensional vectors using pgvector.
 
 ---
 
@@ -109,8 +169,10 @@ go run ./cmd/query --follow -level ERROR
 * Go
 * gRPC
 * PostgreSQL
-* pgx
+* pgvector
+* Ollama
 * Protocol Buffers
+* pgx
 
 ---
 
@@ -118,7 +180,7 @@ go run ./cmd/query --follow -level ERROR
 
 ### Start PostgreSQL
 
-Ensure PostgreSQL is running and accessible.
+Ensure PostgreSQL with pgvector support is running.
 
 ### Run Migrations
 
@@ -138,7 +200,9 @@ go run ./cmd/server
 go run ./cmd/agent
 ```
 
-### Query Historical Logs
+### Query Logs
+
+All logs:
 
 ```bash
 go run ./cmd/query
@@ -147,31 +211,27 @@ go run ./cmd/query
 Filter by level:
 
 ```bash
-go run ./cmd/query -level INFO
+go run ./cmd/query --level INFO
 ```
 
-Filter by service:
+Semantic search:
 
 ```bash
-go run ./cmd/query -service auth
+go run ./cmd/query --similar "login success"
 ```
 
-Limit results:
+Hybrid search:
 
 ```bash
-go run ./cmd/query -limit 10
+go run ./cmd/query \
+  --similar "database timeout" \
+  --level ERROR
 ```
 
-### Follow Logs in Realtime
+Realtime stream:
 
 ```bash
 go run ./cmd/query --follow
-```
-
-Realtime filtered stream:
-
-```bash
-go run ./cmd/query --follow -level ERROR
 ```
 
 ---
@@ -184,28 +244,30 @@ Run all tests:
 go test ./...
 ```
 
-Current test coverage includes:
+Current coverage includes:
 
 * Log parsing
 * Stream filtering
 * Broadcast behavior
+* Filter matching logic
 
 ---
 
-## Future Improvements
+## Roadmap
 
+* Metadata extraction (JSONB enrichment)
+* Similarity score exposure
+* Natural language querying
 * Historical tail + follow mode
 * Integration tests
-* Structured log support
 * Authentication and authorization
 * Web dashboard
-* Multiple storage backends
 
 ---
 
 ## Version
 
-Current Release: **v1.0.0**
+Current Release: **v1.2.0**
 
-Loom v1.0.0 provides a complete end-to-end log aggregation pipeline with ingestion, storage, querying, filtering, and realtime streaming.
+Loom v1.2.0 introduces semantic and hybrid log search powered by vector embeddings and pgvector.
 
