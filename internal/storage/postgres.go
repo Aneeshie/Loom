@@ -214,6 +214,12 @@ func (s *Store) SimilarLogs(
 			continue
 		}
 
+		fmt.Printf(
+			"distance=%.4f message=%s\n",
+			distance,
+			logEntry.Message,
+		)
+
 		logs = append(logs, logEntry)
 	}
 
