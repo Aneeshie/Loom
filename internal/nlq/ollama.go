@@ -20,6 +20,7 @@ func NewOllamaParser(model string) *OllamaParser {
 }
 
 func (p *OllamaParser) Parse(ctx context.Context, query string) (*QueryIntent, error) {
+
 	basePrompt := `You are a query parser for Loom.
 
 Your job is to convert a user's natural language request into JSON.
@@ -36,42 +37,76 @@ Schema:
   "since": ""
 }
 
-Rules:
+Field meanings:
 
-- query: the main semantic search phrase.
-- level: one of ERROR, WARN, INFO, or empty string.
+- query: the main subject being searched for.
+- level: ERROR, WARN, INFO, or empty string.
 - service: service name if specified.
 - host: host name if specified.
-- since: duration if specified (examples: 1h, 24h, 7d).
-- Use empty strings for fields not mentioned.
-- Do not include explanations.
-- Do not include markdown.
-- Do not include code fences.
-- Return JSON only.
+- since: duration such as 1h, 24h, 7d.
+
+Rules:
+
+1. Return ONLY JSON.
+2. Do not include explanations.
+3. Do not include markdown.
+4. Do not include code fences.
+5. Use empty strings for unspecified fields.
+
+Log Level Rules:
+
+- "error", "errors", "failure", "failures", "failed", "exception", "exceptions"
+  => level = "ERROR"
+
+- "warning", "warnings", "warn"
+  => level = "WARN"
+
+- "info", "informational"
+  => level = "INFO"
+
+Query Rules:
+
+- Remove log-level words from the query.
+- Keep only the subject being searched.
+- Prefer concise search phrases.
 
 Examples:
 
-User: show me database errors from the last hour
+User:
+show me authentication failures
 
 {
-  "query": "database error",
+  "query": "authentication",
+  "level": "ERROR",
+  "service": "",
+  "host": "",
+  "since": ""
+}
+
+User:
+show me database errors from the last hour
+
+{
+  "query": "database",
   "level": "ERROR",
   "service": "",
   "host": "",
   "since": "1h"
 }
 
-User: show me authentication failures
+User:
+show me redis issues from billing service
 
 {
-  "query": "authentication failure",
+  "query": "redis",
   "level": "",
-  "service": "",
+  "service": "billing",
   "host": "",
   "since": ""
 }
 
-User: show me warning logs from auth service
+User:
+show me warning logs from auth service
 
 {
   "query": "",
@@ -81,14 +116,15 @@ User: show me warning logs from auth service
   "since": ""
 }
 
-User: show me redis issues from billing service in the last day
+User:
+show me logs from host prod-1
 
 {
-  "query": "redis issue",
+  "query": "",
   "level": "",
-  "service": "billing",
-  "host": "",
-  "since": "24h"
+  "service": "",
+  "host": "prod-1",
+  "since": ""
 }
 
 Now convert the following request:
