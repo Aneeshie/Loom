@@ -32,7 +32,7 @@ func (h *Handler) HandleQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := h.queryService.Query(r.Context(), req.Query)
+	resp, err := h.queryService.Query(r.Context(), req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

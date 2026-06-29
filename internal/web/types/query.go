@@ -3,7 +3,11 @@ package types
 import pb "github.com/Aneeshie/loom/proto"
 
 type QueryRequest struct {
-	Query string `json:"query"`
+	Query   string `json:"query"`
+	Level   string `json:"level"`
+	Service string `json:"service"`
+	Host    string `json:"host"`
+	Since   string `json:"since"`
 }
 
 type QueryResponse struct {

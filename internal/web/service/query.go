@@ -5,7 +5,6 @@ import (
 	"github.com/Aneeshie/loom/internal/nlq"
 	"github.com/Aneeshie/loom/internal/web/types"
 	pb "github.com/Aneeshie/loom/proto"
-	"log"
 )
 
 type QueryService struct {
@@ -20,44 +19,52 @@ func NewQueryService(parser nlq.IntentParser, client pb.LogServiceClient) *Query
 	}
 }
 
-func (s *QueryService) Query(ctx context.Context, query string) (*types.QueryResponse, error) {
-	// parse the ollama
-	intent, err := s.parser.Parse(ctx, query)
-	if err != nil {
-		log.Fatal(err)
+func (s *QueryService) Query(ctx context.Context, req types.QueryRequest) (*types.QueryResponse, error) {
+	var intent *nlq.QueryIntent
+	var err error
+
+	hasFilters := req.Level != "" || req.Service != "" || req.Host != "" || req.Since != ""
+
+	if !hasFilters && req.Query != "" {
+		intent, err = s.parser.Parse(ctx, req.Query)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		intent = &nlq.QueryIntent{
+			Query:   req.Query,
+			Level:   req.Level,
+			Service: req.Service,
+			Host:    req.Host,
+			Since:   req.Since,
+		}
 	}
-	// build a LogFilter
 
 	filter := buildLogFilter(intent)
 
-	// decide between SimilarLogs or GetLogs
 	var logs []*pb.Log
 
-	if intent.Query != " " {
+	if intent.Query != "" && intent.Query != " " {
 		resp, err := s.client.SimilarLogs(ctx, &pb.SimilarLogsRequest{
 			Query:  intent.Query,
 			Limit:  20,
 			Filter: filter,
 		})
-
 		if err != nil {
 			return nil, err
 		}
-
 		logs = resp.Logs
 	} else {
 		resp, err := s.client.GetLogs(ctx, &pb.GetLogsRequest{
 			Limit:  20,
 			Filter: filter,
 		})
-
 		if err != nil {
 			return nil, err
 		}
-
 		logs = resp.Logs
 	}
-	// return a query Response
+
 	return &types.QueryResponse{
 		Intent: mapIntent(intent),
 		Logs:   mapLogs(logs),
