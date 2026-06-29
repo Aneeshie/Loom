@@ -1,273 +1,133 @@
 # Loom
 
-Loom is a distributed log aggregation system built with Go, gRPC, PostgreSQL, and pgvector.
+Loom is a distributed log aggregation system built with Go, gRPC, PostgreSQL, and pgvector. It features a modern, interactive Next.js web dashboard and an AI-powered natural language query engine.
 
 It provides:
 
-* Log ingestion through lightweight agents
-* Centralized log storage in PostgreSQL
-* Historical log querying with filtering
-* Realtime log streaming
-* Semantic log search using vector embeddings
-* Hybrid search combining semantic retrieval and structured filters
+* **Log Ingestion**: Lightweight agents tailing log sources and sending events via gRPC.
+* **Centralized Storage**: Log records persisted securely in PostgreSQL.
+* **Semantic Log Search**: Context-aware log searching powered by vector embeddings and pgvector.
+* **Hybrid Search**: Seamlessly combines vector similarity search with structured metadata filters.
+* **Intelligent Query Routing**: Bypasses the LLM parser when structured filters are provided, routing queries dynamically to optimize latency.
+* **Web Dashboard**: Sleek, glassmorphic UI featuring log inspectors, interactive stats, and live telemetry filtering.
 
 ---
 
-## Architecture
+## System Architecture
 
 ```text
-+--------+
-| Agent  |
-+--------+
-     |
-     | gRPC
-     v
-+----------------+
-|   Loom Server  |
-+----------------+
-     |
-     | Embeddings
-     v
-+------------------------+
-| PostgreSQL + pgvector |
-+------------------------+
-
-     ^
-     |
-     | gRPC
-+--------+
-| Query  |
-+--------+
+               +-----------------------+
+               |   Web Dashboard UI    |
+               |  (Next.js / Tailwind) |
+               +-----------------------+
+                           |
+                           | HTTP / JSON API
+                           v
++--------+     +-----------------------+
+| Agent  |     |      Web Server       |
++--------+     |   (Go API Gateway)    |
+     |         +-----------------------+
+     |                     |
+     | gRPC                | gRPC (LogService)
+     v                     v
++--------------------------------------+
+|             Loom Server              |
+|        (Core Engine / Embeddings)    |
++--------------------------------------+
+     |                     |
+     | pgx                 | Ollama API
+     v                     v
++------------------------+ +-----------+
+| PostgreSQL + pgvector  | | Ollama LLM |
++------------------------+ +-----------+
 ```
 
 ---
 
 ## Components
 
-### Agent
+### 1. Web Dashboard (Next.js)
+A premium dashboard built with Next.js, Tailwind CSS, and Shadcn UI. It includes:
+* **Interactive telemetry metrics** (filtered log count, real-time error rates, service/host statistics).
+* **Advanced search bar** popover menu to filter logs by Severity, Service, Host, and Time window.
+* **Logs viewer grid** featuring a sliding **Log Inspector Drawer** to view dynamic JSON context metadata and copy payloads.
 
-Reads logs from a source file, parses them, and sends them to the server using gRPC.
+### 2. Web Server (Go API Gateway)
+Acts as the REST API gateway (`cmd/web`) serving `/api/v1/query`. It implements **Hybrid Query Routing**:
+* **Natural Language Queries**: If a user submits a query string without any filters, it calls the LLM (Ollama) to extract fields (level, service, host, since).
+* **Direct Semantic Search**: If query text AND filters are specified, it skips the LLM and calls `SimilarLogs` (vector search).
+* **Direct Fetch**: If only filters are specified, it skips semantic search and LLM, performing a direct query (`GetLogs`).
 
-### Server
+### 3. Agent (Go)
+Reads logs from configured file sources, parses severity and timing, and streams entries to the core server via gRPC.
 
-Receives logs from agents, generates vector embeddings, stores logs in PostgreSQL, and streams logs to subscribed clients.
-
-### Query
-
-CLI tool used to:
-
-* Query historical logs
-* Filter logs
-* Follow logs in realtime
-* Perform semantic search
-* Perform hybrid search
-
----
-
-## Features
-
-### Log Ingestion
-
-Agents continuously read log files and send entries to the server.
-
-### Historical Queries
-
-Retrieve logs using filters such as:
-
-* Log level
-* Service name
-* Host
-* Time range
-
-```bash
-go run ./cmd/query --level INFO
-```
-
----
-
-### Semantic Search
-
-Search logs by meaning instead of exact keywords.
-
-```bash
-go run ./cmd/query --similar "database timeout"
-```
-
-Example matches:
-
-```text
-Database connection timeout
-Query execution exceeded timeout
-PostgreSQL unavailable
-Connection pool exhausted
-```
-
----
-
-### Hybrid Search
-
-Combine semantic search with structured filters.
-
-```bash
-go run ./cmd/query \
-  --similar "database timeout" \
-  --level ERROR
-```
-
-Example:
-
-```text
-Database connection timeout
-Query execution exceeded timeout
-PostgreSQL unavailable
-```
-
----
-
-### Realtime Streaming
-
-Follow logs as they arrive.
-
-```bash
-go run ./cmd/query --follow
-```
-
----
-
-### Realtime Filtered Streaming
-
-Subscribe only to logs matching specific filters.
-
-```bash
-go run ./cmd/query \
-  --follow \
-  --level ERROR
-```
-
----
-
-## Semantic Search Pipeline
-
-```text
-Query
- ↓
-Embedding Generation
- ↓
-Vector Similarity Search
- ↓
-Structured Filtering
- ↓
-Ranked Results
-```
-
-Logs are embedded using Ollama and stored as 768-dimensional vectors using pgvector.
-
----
-
-## Technology Stack
-
-* Go
-* gRPC
-* PostgreSQL
-* pgvector
-* Ollama
-* Protocol Buffers
-* pgx
+### 4. Server (Go)
+Accepts gRPC streams from agents, generates vector embeddings, stores logs, and manages subscriptions for real-time query clients.
 
 ---
 
 ## Running Loom
 
-### Start PostgreSQL
+### 1. Start Database & Dependencies
+Ensure PostgreSQL with `pgvector` and Ollama are running.
+```bash
+docker-compose up -d
+```
 
-Ensure PostgreSQL with pgvector support is running.
-
-### Run Migrations
-
+### 2. Run Database Migrations
 ```bash
 make migrate-up
 ```
 
-### Start the Server
-
+### 3. Start Core Loom Server
 ```bash
 go run ./cmd/server
 ```
 
-### Start an Agent
-
+### 4. Start Ingestion Agent
 ```bash
 go run ./cmd/agent
 ```
 
-### Query Logs
-
-All logs:
-
+### 5. Run the Go API Gateway (Web Server)
 ```bash
-go run ./cmd/query
+go run ./cmd/web
 ```
+The Go server will start serving endpoints at `http://localhost:3000`.
 
-Filter by level:
-
+### 6. Start the Web Dashboard
 ```bash
-go run ./cmd/query --level INFO
+cd web
+pnpm install
+pnpm run dev
 ```
-
-Semantic search:
-
-```bash
-go run ./cmd/query --similar "login success"
-```
-
-Hybrid search:
-
-```bash
-go run ./cmd/query \
-  --similar "database timeout" \
-  --level ERROR
-```
-
-Realtime stream:
-
-```bash
-go run ./cmd/query --follow
-```
+Open `http://localhost:3001` (or your terminal's allocated port) to access the interactive dashboard.
 
 ---
 
-## Testing
+## API Query Endpoints
 
-Run all tests:
-
-```bash
-go test ./...
+### Query Endpoint
+* **Path**: `/api/v1/query`
+* **Method**: `POST`
+* **Payload**:
+```json
+{
+  "query": "connection timeout",
+  "level": "ERROR",
+  "service": "payment-gateway",
+  "host": "prod-ap-south-1a",
+  "since": "1h"
+}
 ```
-
-Current coverage includes:
-
-* Log parsing
-* Stream filtering
-* Broadcast behavior
-* Filter matching logic
 
 ---
 
 ## Roadmap
 
-* Metadata extraction (JSONB enrichment)
-* Similarity score exposure
-* Natural language querying
-* Historical tail + follow mode
-* Integration tests
-* Authentication and authorization
-* Web dashboard
-
----
-
-## Version
-
-Current Release: **v1.2.0**
-
-Loom v1.2.0 introduces semantic and hybrid log search powered by vector embeddings and pgvector.
-
+* [x] Web dashboard UI
+* [x] Natural language querying integration (Ollama LLM)
+* [x] Hybrid routing optimization
+* [ ] Metadata extraction (JSONB enrichment)
+* [ ] Similarity score exposure in UI
+* [ ] Authentication and authorization
