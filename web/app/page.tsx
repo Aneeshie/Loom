@@ -4,9 +4,24 @@ import { useState, useMemo, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import IntentCard from '@/components/IntentCard';
 import LogList from '@/components/LogList';
-import { getMockLogs } from '@/lib/mockLogs';
 import { LogEntry } from '@/lib/types';
-import { Terminal, Activity, Cpu, Server, ShieldCheck, Loader2 } from 'lucide-react';
+import { Terminal, Activity, Cpu, Server, ShieldCheck, Loader2, AlertCircle } from 'lucide-react';
+
+const SERVICES_LIST = [
+  'payment-gateway',
+  'auth-service',
+  'worker-node-1',
+  'cache-manager',
+  'analytics-api',
+  'user-db-pool',
+];
+
+const HOSTS_LIST = [
+  'prod-ap-south-1a',
+  'prod-ap-south-1b',
+  'staging-eu-west-1a',
+  'dev-us-east-1',
+];
 
 export default function Dashboard() {
   // Filter States
@@ -20,73 +35,12 @@ export default function Dashboard() {
   const [activeLogs, setActiveLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLive, setIsLive] = useState(false);
-
-  // Load static logs once (for derivation and local fallback)
-  const logs = useMemo(() => getMockLogs(), []);
-
-  // Compute unique services and hosts from all logs for the selectors
-  const servicesList = useMemo(() => {
-    return Array.from(new Set(logs.map(log => log.service))).sort();
-  }, [logs]);
-
-  const hostsList = useMemo(() => {
-    return Array.from(new Set(logs.map(log => log.host))).sort();
-  }, [logs]);
-
-  // Fallback local search filtering
-  const runLocalSearch = (queryText: string, lvl: string, srv: string, hst: string, duration: string) => {
-    const filtered = logs.filter(log => {
-      // 1. Level filter
-      if (lvl !== 'all' && log.level !== lvl.toLowerCase()) {
-        return false;
-      }
-      
-      // 2. Service filter
-      if (srv && log.service !== srv) {
-        return false;
-      }
-      
-      // 3. Host filter
-      if (hst && log.host !== hst) {
-        return false;
-      }
-      
-      // 4. Since filter
-      if (duration !== 'all') {
-        const logTime = new Date(log.timestamp).getTime();
-        const nowTime = Date.now();
-        let thresholdMs = 0;
-        
-        if (duration === '5m') thresholdMs = 5 * 60 * 1000;
-        else if (duration === '15m') thresholdMs = 15 * 60 * 1000;
-        else if (duration === '1h') thresholdMs = 60 * 60 * 1000;
-        else if (duration === '24h') thresholdMs = 24 * 60 * 60 * 1000;
-        else if (duration === '7d') thresholdMs = 7 * 24 * 60 * 60 * 1000;
-        
-        if (nowTime - logTime > thresholdMs) {
-          return false;
-        }
-      }
-      
-      // 5. Search query text filter
-      if (queryText.trim()) {
-        const q = queryText.toLowerCase();
-        const matchesMessage = log.message.toLowerCase().includes(q);
-        const matchesService = log.service.toLowerCase().includes(q);
-        const matchesHost = log.host.toLowerCase().includes(q);
-        const matchesLevel = log.level.toLowerCase().includes(q);
-        
-        return matchesMessage || matchesService || matchesHost || matchesLevel;
-      }
-      
-      return true;
-    });
-    setActiveLogs(filtered);
-  };
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Main fetch runner
   const fetchLiveLogs = async (queryText: string, lvl: string, srv: string, hst: string, duration: string) => {
     setIsLoading(true);
+    setErrorMsg(null);
     try {
       const payload = {
         query: queryText,
@@ -134,9 +88,10 @@ export default function Dashboard() {
         throw new Error("Missing logs field");
       }
     } catch (err) {
-      console.warn("Go server unavailable, using local fallback client search:", err);
+      console.error("Go server API request failed:", err);
       setIsLive(false);
-      runLocalSearch(queryText, lvl, srv, hst, duration);
+      setErrorMsg("Unable to connect to the Go Observability API server. Please check that your backend is running.");
+      setActiveLogs([]);
     } finally {
       setIsLoading(false);
     }
@@ -185,16 +140,15 @@ export default function Dashboard() {
                   Secure
                 </span>
                 
-                {/* Live connection badge */}
                 {isLive ? (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-indigo-550/15 text-indigo-400 border border-indigo-500/20">
                     <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
                     Live Go API
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                    Dev Mock Mode
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-rose-500/10 text-rose-455 border border-rose-500/20">
+                    <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                    Offline
                   </span>
                 )}
               </div>
@@ -213,30 +167,30 @@ export default function Dashboard() {
             setHost={setHost}
             since={since}
             setSince={setSince}
-            servicesList={servicesList}
-            hostsList={hostsList}
+            servicesList={SERVICES_LIST}
+            hostsList={HOSTS_LIST}
           />
         </header>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Logs Card */}
-          <div className="bg-gray-950/40 border border-gray-850 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
-            <span className="text-xs font-bold text-gray-450 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="bg-gray-950/40 border border-gray-855 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
+            <span className="text-xs font-bold text-gray-455 uppercase tracking-wider flex items-center gap-1.5">
               <Terminal className="h-4 w-4 text-indigo-400" />
-              Logs Filtered
+              Logs Returned
             </span>
             <div className="flex justify-between items-baseline mt-1">
               <span className="text-2xl font-extrabold text-white tracking-tight">{metrics.total}</span>
-              <span className="text-[10px] font-semibold text-gray-450">Total Database: {logs.length}</span>
+              <span className="text-[10px] font-semibold text-gray-455">Active Stream</span>
             </div>
             <div className="h-1.5 bg-gray-900 rounded-full overflow-hidden mt-2">
-              <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${(metrics.total / Math.max(logs.length, 1)) * 100}%` }} />
+              <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: '100%' }} />
             </div>
           </div>
 
           {/* Error Rate Card */}
-          <div className="bg-gray-950/40 border border-gray-850 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
+          <div className="bg-gray-950/40 border border-gray-855 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
             <span className="text-xs font-bold text-gray-455 uppercase tracking-wider flex items-center gap-1.5">
               <Activity className="h-4 w-4 text-rose-455" />
               System Error Rate
@@ -251,14 +205,14 @@ export default function Dashboard() {
           </div>
 
           {/* Unique Services Card */}
-          <div className="bg-gray-950/40 border border-gray-850 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
+          <div className="bg-gray-950/40 border border-gray-855 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
             <span className="text-xs font-bold text-gray-455 uppercase tracking-wider flex items-center gap-1.5">
               <Cpu className="h-4 w-4 text-purple-400" />
               Active Services
             </span>
             <div className="flex justify-between items-baseline mt-1">
               <span className="text-2xl font-extrabold text-white tracking-tight">{metrics.activeServicesCount}</span>
-              <span className="text-[10px] font-semibold text-gray-400">Monitoring Online</span>
+              <span className="text-[10px] font-semibold text-gray-450">Monitoring Online</span>
             </div>
             <div className="h-1.5 bg-gray-900 rounded-full overflow-hidden mt-2">
               <div className="h-full bg-purple-500 rounded-full transition-all duration-500" style={{ width: '100%' }} />
@@ -266,7 +220,7 @@ export default function Dashboard() {
           </div>
 
           {/* Unique Hosts Card */}
-          <div className="bg-gray-950/40 border border-gray-850 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
+          <div className="bg-gray-950/40 border border-gray-855 p-5 rounded-2xl shadow-xl backdrop-blur-md space-y-2 flex flex-col justify-between hover:border-gray-800 transition-all duration-300">
             <span className="text-xs font-bold text-gray-455 uppercase tracking-wider flex items-center gap-1.5">
               <Server className="h-4 w-4 text-teal-400" />
               Monitored Hosts
@@ -281,11 +235,21 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {errorMsg && (
+          <div className="bg-rose-500/10 border border-rose-500/25 p-4 rounded-xl flex items-start gap-3 text-rose-300">
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold">API Connection Error</h4>
+              <p className="text-xs text-rose-300/80">{errorMsg}</p>
+            </div>
+          </div>
+        )}
+
         <main className="space-y-6 relative">
           {/* Loader Overlay */}
           {isLoading && (
             <div className="absolute inset-0 bg-[#060608]/40 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
-              <div className="p-3 bg-gray-950 border border-gray-800 rounded-full shadow-2xl flex items-center justify-center">
+              <div className="p-3 bg-gray-955 border border-gray-800 rounded-full shadow-2xl flex items-center justify-center">
                 <Loader2 className="h-6 w-6 text-indigo-400 animate-spin" />
               </div>
             </div>
@@ -298,7 +262,7 @@ export default function Dashboard() {
 
           {/* Telemetry Data */}
           <section aria-label="Log Stream">
-            <LogList logs={activeLogs} totalCount={logs.length} />
+            <LogList logs={activeLogs} totalCount={activeLogs.length} />
           </section>
         </main>
 
